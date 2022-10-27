@@ -33,11 +33,27 @@ def sitemap():
 @app.route('/user', methods=['GET'])
 def handle_hello():
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+    userQuery = User.query.all()
+    allUsers = list(map(lambda x: x.serialize(), userQuery))
 
-    return jsonify(response_body), 200
+    return jsonify(allUsers), 200
+
+@app.route('/user', methods=['POST'])
+def createUser():
+    body = request.get_json()
+    if body == None:
+        return "The request body is null", 400
+    if 'email' not in body:
+        return "Add the user email", 400
+    if 'password' not in body:
+        return "Add user password", 400
+    if 'is_active' not in body:
+        return "Add user activity status", 400
+    print(body)
+    newUser = User(email=body["email"], password=body["password"], is_active=body["is_active"])
+    db.session.add(newUser)
+    db.session.commit()
+    return 'User has been created', 200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
