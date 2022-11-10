@@ -39,7 +39,7 @@ class FavChar(db.Model):
     def serialize(self):
         return {
             "id" : self.id,
-            "name" : self.name
+            "people_id" : self.people_id
         }
 
 
@@ -64,7 +64,7 @@ class FavPlanet(db.Model):
     def serialize(self):
         return {
             "id" : self.id,
-            "name" : self.name
+            "planet_id" : self.planet_id
         }
 
 

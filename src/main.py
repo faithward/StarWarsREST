@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, People, Planet
+from models import db, User, People, Planet, FavPlanet, FavChar
 #from models import Person
 
 app = Flask(__name__)
@@ -199,6 +199,66 @@ def deletePlanet(id):
     db.session.delete(plan)
     db.session.commit()
     return 'Planet deleted'
+
+@app.route('/favplanet/', methods=['POST'])
+def addFavPlanet():
+    body = request.get_json()
+    if body == None:
+        return "The request body is null", 400
+    if 'planet_id' not in body:
+        return "Add the planet's ID number", 400
+    newFav = FavPlanet(planet_id=body["planet_id"])
+    favPlan = Planet.query.get(newFav.planet_id)
+    if favPlan == None:
+        raise APIException('Planet does not exist', status_code=404)
+    db.session.add(newFav)
+    db.session.commit()
+    return 'Favorite planet has been added', 200
+
+@app.route('/favplanet/', methods=['GET'])
+def getFavPlanets():
+    favQuery = FavPlanet.query.all()
+    allFavPlanets = list(map(lambda x: x.serialize(), favQuery))
+    return jsonify(allFavPlanets), 200
+
+@app.route('/favplanet/<int:id>', methods=['DELETE'])
+def deleteFavPlanet(id):
+    plan = FavPlanet.query.get(id)
+    if plan == None:
+        raise APIException('Planet does not exist', status_code=404)
+    db.session.delete(plan)
+    db.session.commit()
+    return 'Favorite planet deleted'
+
+@app.route('/favchar/', methods=['POST'])
+def addFavChar():
+    body = request.get_json()
+    if body == None:
+        return "The request body is null", 400
+    if 'people_id' not in body:
+        return "Add the character's ID number", 400
+    newFav = FavChar(people_id=body["people_id"])
+    favChar = People.query.get(newFav.people_id)
+    if favChar == None:
+        raise APIException('Character does not exist', status_code=404)
+    db.session.add(newFav)
+    db.session.commit()
+    return 'Favorite character has been added', 200
+
+@app.route('/favchar/', methods=['GET'])
+def getFavChars():
+    favQuery = FavChar.query.all()
+    allFavChars = list(map(lambda x: x.serialize(), favQuery))
+    return jsonify(allFavChars), 200
+
+@app.route('/favchar/<int:id>', methods=['DELETE'])
+def deleteFavChar(id):
+    char = FavChar.query.get(id)
+    if char == None:
+        raise APIException('Character does not exist', status_code=404)
+    db.session.delete(char)
+    db.session.commit()
+    return 'Favorite character deleted'
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
